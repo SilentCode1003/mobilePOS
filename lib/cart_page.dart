@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smallprojectpos/model/product.dart';
 import 'package:smallprojectpos/test.dart';
 
 class CartItemPage extends StatefulWidget {
@@ -46,9 +47,7 @@ class _CartItemPageState extends State<CartItemPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-           
-                  },
+                  onPressed: () {},
                   child: const Text("DELETE ENTRY"),
                 ),
 

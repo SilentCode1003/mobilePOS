@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:smallprojectpos/api/product.dart';
 import 'package:smallprojectpos/cart_page.dart';
+import 'package:smallprojectpos/model/product.dart';
 
 void main() {
   runApp(ShoppingApp());
@@ -25,61 +29,69 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   Map<String, int> cart = {};
   int totalCartItems = 0;
   Map<String, double> totalPrices = {};
+  // List<ProductModel> productlist = [];
 
-  List<Product> products = [
-    Product('Breakfast Meal', 9.99, 'assets/food1.jpeg'),
-    Product('Double Patty', 19.99, 'assets/food2.jpeg'),
-    Product('1pc. Chicken', 29.99, 'assets/food3.jpeg'),
-    Product('Drink', 5.99, 'assets/testimage.png'),
-  ];
+  List<Product> productlist = [];
   @override
-void initState() {
-  super.initState();
-  updateTotalCartItems();
-}
+  void initState() {
+    super.initState();
+    _getproductlist();
+    updateTotalCartItems();
+  }
 
-void updateTotalCartItems() {
-  int total = 0;
-  cart.forEach((product, quantity) {
-    total += quantity;
-  });
-  setState(() {
-    totalCartItems = total;
-  });
-}
+  Future<void> _getproductlist() async {
+    final results = await ProductAPI().getProduct();
+    final jsonData = json.encode(results['data']);
 
- void addToCart(String product) {
-  setState(() {
-    if (cart.containsKey(product)) {
-      cart[product] = (cart[product] ?? 0) + 1;
-      totalPrices[product] = (totalPrices[product] ?? 0) +
-          products.firstWhere((p) => p.name == product).price;
-    } else {
-      cart[product] = 1;
-      totalPrices[product] =
-          products.firstWhere((p) => p.name == product).price;
-    }
-    updateTotalCartItems(); // Update the total cart items
-  });
-}
+    setState(() {
+      for (var data in json.decode(jsonData)) {
+        productlist
+            .add(Product(data['description'], data['price'].toDouble(), data['image']));
+      }
+    });
+  }
 
-void removeFromCart(String product) {
-  setState(() {
-    if (cart.containsKey(product)) {
-      final currentQuantity = cart[product] ?? 0;
-      if (currentQuantity > 1) {
-        cart[product] = currentQuantity - 1;
-        totalPrices[product] = (totalPrices[product] ?? 0) -
-            (products.firstWhere((p) => p.name == product).price);
+  void updateTotalCartItems() {
+    int total = 0;
+    cart.forEach((product, quantity) {
+      total += quantity;
+    });
+    setState(() {
+      totalCartItems = total;
+    });
+  }
+
+  void addToCart(String product) {
+    setState(() {
+      if (cart.containsKey(product)) {
+        cart[product] = (cart[product] ?? 0) + 1;
+        totalPrices[product] = (totalPrices[product] ?? 0) +
+            productlist.firstWhere((p) => p.name == product).price;
       } else {
-        cart.remove(product);
-        totalPrices.remove(product);
+        cart[product] = 1;
+        totalPrices[product] =
+            productlist.firstWhere((p) => p.name == product).price;
       }
       updateTotalCartItems(); // Update the total cart items
-    }
-  });
-}
+    });
+  }
 
+  void removeFromCart(String product) {
+    setState(() {
+      if (cart.containsKey(product)) {
+        final currentQuantity = cart[product] ?? 0;
+        if (currentQuantity > 1) {
+          cart[product] = currentQuantity - 1;
+          totalPrices[product] = (totalPrices[product] ?? 0) -
+              (productlist.firstWhere((p) => p.name == product).price);
+        } else {
+          cart.remove(product);
+          totalPrices.remove(product);
+        }
+        updateTotalCartItems(); // Update the total cart items
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +124,8 @@ void removeFromCart(String product) {
                           builder: (context) => CartItemPage(
                             cart: cart,
                             removeFromCart: removeFromCart,
-                            products: products, addToCart: addToCart,
+                            products: productlist,
+                            addToCart: addToCart,
                           ),
                         ),
                       );
@@ -128,9 +141,8 @@ void removeFromCart(String product) {
         children: <Widget>[
           Expanded(
             child: ListView.builder(
-              itemCount: products.length,
+              itemCount: productlist.length,
               itemBuilder: (context, index) {
-                Product product = products[index];
                 return Card(
                   elevation: 3,
                   child: Padding(
@@ -138,22 +150,19 @@ void removeFromCart(String product) {
                     child: Row(
                       children: <Widget>[
                         SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Image.asset(
-                            product.imageAsset,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                            width: 100,
+                            height: 100,
+                            child: Image.memory(
+                                base64Decode(productlist[index].imageAsset))),
                         Expanded(
                           child: ListTile(
-                            title: Text(product.name),
+                            title: Text(productlist[index].name),
                             subtitle: Text(
-                              'Price: \$${product.price.toStringAsFixed(2)}',
+                              'Price: \$${productlist[index].price.toStringAsFixed(2)}',
                             ),
                             trailing: ElevatedButton(
                               onPressed: () {
-                                addToCart(product.name);
+                                addToCart(productlist[index].name);
                               },
                               child: const Text("Add to Cart"),
                             ),
