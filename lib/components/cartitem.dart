@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/model/product.dart';
-import 'package:smallprojectpos/test.dart';
+import 'package:urbanhideoutpos/components/cart.dart';
+import 'package:urbanhideoutpos/components/payment.dart';
 
 class CartItemPage extends StatefulWidget {
   final Map<String, int> cart;
-  final Function(String) removeFromCart;
+  final Function(String) deductToCart;
   final Function(String) addToCart;
+  final Function(String) removeToCart;
   final List<Product> products;
 
-  CartItemPage({
-    required this.cart,
-    required this.removeFromCart,
-    required this.addToCart,
-    required this.products,
-  });
+  CartItemPage(
+      {required this.cart,
+      required this.deductToCart,
+      required this.addToCart,
+      required this.products,
+      required this.removeToCart});
 
   @override
   _CartItemPageState createState() => _CartItemPageState();
@@ -42,17 +43,10 @@ class _CartItemPageState extends State<CartItemPage> {
           margin: const EdgeInsets.all(5),
           child: ListTile(
             title: Text('$product (QTY $quantity)'),
-            subtitle: Text('Total Price: \$${totalPrice.toStringAsFixed(2)}'),
+            subtitle: Text('Total Price: \₱${totalPrice.toStringAsFixed(2)}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text("DELETE ENTRY"),
-                ),
-
-                const SizedBox(
-                    width: 10), // Add some spacing between the buttons
                 ElevatedButton(
                   onPressed: () {
                     widget.addToCart(product);
@@ -60,14 +54,27 @@ class _CartItemPageState extends State<CartItemPage> {
                   },
                   child: const Text("+"),
                 ),
-
+                const SizedBox(
+                    width: 5), // Add some spacing between the buttons
                 ElevatedButton(
                   onPressed: () {
-                    widget.removeFromCart(product);
+                    widget.deductToCart(product);
                     setState(() {});
                   },
                   child: const Text("-"),
                 ),
+                const SizedBox(
+                    width: 16), // Add some spacing between the buttons
+                ElevatedButton.icon(
+                    onPressed: () {
+                      widget.removeToCart(product);
+                      setState(() {});
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                    label: const Text('REMOVE')),
               ],
             ),
           ),
@@ -79,10 +86,10 @@ class _CartItemPageState extends State<CartItemPage> {
             margin: const EdgeInsets.all(5),
             child: ListTile(
               title: const Text('Product Not Found'),
-              subtitle: const Text('Total Price: \$0.00'),
+              subtitle: const Text('Total Price: \₱0.00'),
               trailing: ElevatedButton(
                 onPressed: () {
-                  widget.removeFromCart(product);
+                  widget.deductToCart(product);
                   setState(() {});
                 },
                 child: const Text("Remove"),
@@ -95,7 +102,7 @@ class _CartItemPageState extends State<CartItemPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Cart'),
+        title: const Text('Item List'),
       ),
       body: Column(
         children: <Widget>[
@@ -107,10 +114,18 @@ class _CartItemPageState extends State<CartItemPage> {
           ListTile(
             title: const Text('Total',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Total Price: \$${total.toStringAsFixed(2)}'),
+            subtitle: Text('Total Price: \₱${total.toStringAsFixed(2)}'),
             trailing: ElevatedButton(
               onPressed: () {
                 // Add your action when the "Confirm Payment" button is pressed here.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaymentPage(
+                      total: total,
+                    ),
+                  ),
+                );
               },
               child: const Text('Confirm Payment'),
             ),

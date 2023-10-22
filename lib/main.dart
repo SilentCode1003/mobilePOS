@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/test.dart';
+import 'package:urbanhideoutpos/components/cart.dart';
+import 'package:urbanhideoutpos/components/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +13,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.from(
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.brown)),
 
-      initialRoute: '/', // Set the initial route
+      initialRoute: '/login', // Set the initial route
       routes: {
-        '/': (context) => ShoppingApp(), // Define the route for MyDashboard
+        '/login': (context) =>
+            LoginScreen(), // Define the route for MyDashboard
+        '/cart': (context) => const CartPage(),
       },
     );
   }

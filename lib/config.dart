@@ -3,4 +3,5 @@ class Config {
 
   static const String getActiveCategoryAPI = 'mastercategory/getactive';
   static const String getProductAPI = 'product/load';
+  static const String getPaymentAPI = 'masterpayment/load';
 }

@@ -2,34 +2,36 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:smallprojectpos/api/product.dart';
-import 'package:smallprojectpos/cart_page.dart';
-import 'package:smallprojectpos/model/product.dart';
+import 'package:urbanhideoutpos/api/product.dart';
+import 'package:urbanhideoutpos/components/cartitem.dart';
 
 void main() {
-  runApp(ShoppingApp());
+  runApp(CartApp());
 }
 
-class ShoppingApp extends StatelessWidget {
+class CartApp extends StatelessWidget {
+  const CartApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ShoppingCartPage(),
+      home: CartPage(),
     );
   }
 }
 
-class ShoppingCartPage extends StatefulWidget {
+class CartPage extends StatefulWidget {
+  const CartPage({super.key});
+
   @override
-  _ShoppingCartPageState createState() => _ShoppingCartPageState();
+  _CartPageState createState() => _CartPageState();
 }
 
-class _ShoppingCartPageState extends State<ShoppingCartPage> {
+class _CartPageState extends State<CartPage> {
   Map<String, int> cart = {};
   int totalCartItems = 0;
   Map<String, double> totalPrices = {};
-  // List<ProductModel> productlist = [];
 
   List<Product> productlist = [];
   @override
@@ -45,8 +47,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
     setState(() {
       for (var data in json.decode(jsonData)) {
-        productlist
-            .add(Product(data['description'], data['price'].toDouble(), data['image']));
+        productlist.add(Product(
+            data['description'], data['price'].toDouble(), data['image']));
       }
     });
   }
@@ -76,7 +78,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     });
   }
 
-  void removeFromCart(String product) {
+  void deductToCart(String product) {
     setState(() {
       if (cart.containsKey(product)) {
         final currentQuantity = cart[product] ?? 0;
@@ -93,11 +95,21 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     });
   }
 
+  void removeToCart(String product) {
+    setState(() {
+      if (cart.containsKey(product)) {
+        cart.remove(product);
+        totalPrices.remove(product);
+        updateTotalCartItems(); // Update the total cart items
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping Cart'),
+        title: const Text('Urban Hideout Cafe'),
         actions: [
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,9 +135,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         MaterialPageRoute(
                           builder: (context) => CartItemPage(
                             cart: cart,
-                            removeFromCart: removeFromCart,
+                            deductToCart: deductToCart,
                             products: productlist,
                             addToCart: addToCart,
+                            removeToCart: removeToCart,
                           ),
                         ),
                       );
@@ -136,6 +149,33 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             ],
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.brown,
+              ),
+              child: Text(
+                'Urban Hideout cafe',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logut'),
+              onTap: () {
+                // Add your action when Settings is tapped
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: <Widget>[
@@ -158,7 +198,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           child: ListTile(
                             title: Text(productlist[index].name),
                             subtitle: Text(
-                              'Price: \$${productlist[index].price.toStringAsFixed(2)}',
+                              'Price: ₱${productlist[index].price.toStringAsFixed(2)}',
                             ),
                             trailing: ElevatedButton(
                               onPressed: () {
@@ -181,6 +221,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 }
 
+//Product Class
 class Product {
   final String name;
   final double price;
