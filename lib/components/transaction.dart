@@ -11,6 +11,17 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController _amountTenderController = TextEditingController();
+  final TextEditingController _paymentTypeController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  Future<void> _charge() async{
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +41,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     maxWidth: 380.0,
                   ),
                   child: TextField(
-                    controller: _amountTenderController,
+                    controller: _paymentTypeController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       focusedBorder: OutlineInputBorder(
