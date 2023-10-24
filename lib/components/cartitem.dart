@@ -26,7 +26,6 @@ class _CartItemPageState extends State<CartItemPage> {
     double total = 0.0;
 
     List<Widget> cartItems = [];
-
     for (int index = 0; index < widget.cart.length; index++) {
       String product = widget.cart.keys.elementAt(index);
       int? quantity = widget.cart[product];
@@ -123,6 +122,8 @@ class _CartItemPageState extends State<CartItemPage> {
                   MaterialPageRoute(
                     builder: (context) => PaymentPage(
                       total: total,
+                      cart: widget.cart,
+                      products: widget.products,
                     ),
                   ),
                 );

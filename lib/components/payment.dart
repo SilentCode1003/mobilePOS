@@ -2,11 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:urbanhideoutpos/api/payment.dart';
+import 'package:urbanhideoutpos/components/cart.dart';
 import 'package:urbanhideoutpos/components/transaction.dart';
 
 class PaymentPage extends StatefulWidget {
   double total;
-  PaymentPage({super.key, required this.total});
+  Map<String, dynamic> cart;
+  List<Product> products;
+  PaymentPage(
+      {super.key,
+      required this.total,
+      required this.cart,
+      required this.products});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -47,6 +54,8 @@ class _PaymentPageState extends State<PaymentPage> {
                   builder: (context) => TransactionPage(
                     total: widget.total,
                     paymenttype: paymentlist[index],
+                    cart: widget.cart,
+                    products: widget.products,
                   ),
                 ),
               );

@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import '../config.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,14 +18,9 @@ class SalesDetailAPI {
     return data;
   }
 
-  Future<Map<String, dynamic>> sendtransaction(
-      double id,
-      int posid,
-      String cashier,
-      String paymenttype,
-      List<Map<String, dynamic>> details,
-      double total) async {
-    final url = Uri.parse('${Config.apiUrl}${Config.getActiveCategoryAPI}');
+  Future<Map<String, dynamic>> sendtransaction(String id, String posid,
+      String cashier, String paymenttype, String details, String total) async {
+    final url = Uri.parse('${Config.apiUrl}${Config.sendTransactionAPI}');
     final response = await http.post(url, body: {
       'id': id,
       'posid': posid,

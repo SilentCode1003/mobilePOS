@@ -1,9 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:urbanhideoutpos/api/salesdetail.dart';
+import 'package:urbanhideoutpos/components/cart.dart';
 
 class TransactionPage extends StatefulWidget {
   double total;
   String paymenttype;
-  TransactionPage({super.key, required this.total, required this.paymenttype});
+  Map<String, dynamic> cart;
+  List<Product> products;
+  TransactionPage(
+      {super.key,
+      required this.total,
+      required this.paymenttype,
+      required this.cart,
+      required this.products});
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -11,7 +22,9 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController _amountTenderController = TextEditingController();
-  final TextEditingController _paymentTypeController = TextEditingController();
+  final TextEditingController _paymentReferenceController =
+      TextEditingController();
+  List<Map<String, dynamic>> itemlist = [];
 
   @override
   void initState() {
@@ -19,8 +32,34 @@ class _TransactionPageState extends State<TransactionPage> {
     super.initState();
   }
 
-  Future<void> _charge() async{
+  Future<void> _charge() async {
+    double detailid = 1000000;
+    double amount = double.parse(_amountTenderController.text);
+    double change = amount - widget.total;
 
+    for (int index = 0; index < widget.cart.length; index++) {
+      String product = widget.cart.keys.elementAt(index);
+      int? quantity = widget.cart[product];
+      Product? productData = widget.products.firstWhere(
+        (p) => p.name == product,
+        orElse: () => Product("Product Not Found", 0.0, ""),
+      );
+
+      itemlist.add(
+          {'name': product, 'price': productData.price, 'quantity': quantity});
+    }
+
+    print(widget.cart);
+    final results = await SalesDetailAPI().sendtransaction(
+        detailid.toString(),
+        '1000',
+        'dev42',
+        widget.paymenttype,
+        jsonEncode(itemlist),
+        widget.total.toString());
+
+    print(results);
+    // final jsonData = json.encode(results['data']);
   }
 
   @override
@@ -41,7 +80,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     maxWidth: 380.0,
                   ),
                   child: TextField(
-                    controller: _paymentTypeController,
+                    controller: _paymentReferenceController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       focusedBorder: OutlineInputBorder(
@@ -87,7 +126,9 @@ class _TransactionPageState extends State<TransactionPage> {
       bottomNavigationBar: Container(
         height: 80,
         child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              _charge();
+            },
             child: const Text(
               'CHARGE',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36),
