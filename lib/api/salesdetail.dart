@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class SalesDetailAPI {
   Future<Map<String, dynamic>> getdetailid(String posid) async {
-    final url = Uri.parse('${Config.apiUrl}${Config.getActiveCategoryAPI}');
+    final url = Uri.parse('${Config.apiUrl}${Config.getDetailIDAPI}');
     final response = await http.post(url, body: {'posid': posid});
 
     final responseData = json.decode(response.body);

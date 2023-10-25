@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:urbanhideoutpos/api/product.dart';
+import 'package:urbanhideoutpos/api/salesdetail.dart';
 import 'package:urbanhideoutpos/components/cartitem.dart';
 
 void main() {
@@ -34,11 +36,24 @@ class _CartPageState extends State<CartPage> {
   Map<String, double> totalPrices = {};
 
   List<Product> productlist = [];
+  int detailid = 0;
   @override
   void initState() {
     super.initState();
     _getproductlist();
+    _getdetailid();
     updateTotalCartItems();
+  }
+
+  Future<void> _getdetailid() async {
+    final results = await SalesDetailAPI().getdetailid('1000');
+    final jsonData = json.encode(results['data']);
+
+    setState(() {
+      for (var data in json.decode(jsonData)) {
+        detailid = int.parse(data['detailid']) + 1;
+      }
+    });
   }
 
   Future<void> _getproductlist() async {
@@ -105,6 +120,10 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  void incrementDetailid() {
+    detailid++;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +158,8 @@ class _CartPageState extends State<CartPage> {
                             products: productlist,
                             addToCart: addToCart,
                             removeToCart: removeToCart,
+                            detailid: detailid,
+                            incrementid: incrementDetailid,
                           ),
                         ),
                       );

@@ -8,13 +8,17 @@ class CartItemPage extends StatefulWidget {
   final Function(String) addToCart;
   final Function(String) removeToCart;
   final List<Product> products;
+  final int detailid;
+  final Function() incrementid;
 
   CartItemPage(
       {required this.cart,
       required this.deductToCart,
       required this.addToCart,
       required this.products,
-      required this.removeToCart});
+      required this.removeToCart,
+      required this.detailid,
+      required this.incrementid});
 
   @override
   _CartItemPageState createState() => _CartItemPageState();
@@ -101,7 +105,7 @@ class _CartItemPageState extends State<CartItemPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Item List'),
+        title: Text('OR:${widget.detailid} - Item List'),
       ),
       body: Column(
         children: <Widget>[
@@ -124,6 +128,8 @@ class _CartItemPageState extends State<CartItemPage> {
                       total: total,
                       cart: widget.cart,
                       products: widget.products,
+                      detailid: widget.detailid,
+                      incrementid: widget.incrementid,
                     ),
                   ),
                 );

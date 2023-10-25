@@ -9,12 +9,17 @@ class TransactionPage extends StatefulWidget {
   String paymenttype;
   Map<String, dynamic> cart;
   List<Product> products;
+  int detailid;
+  Function() incrementid;
+
   TransactionPage(
       {super.key,
       required this.total,
       required this.paymenttype,
       required this.cart,
-      required this.products});
+      required this.products,
+      required this.detailid,
+      required this.incrementid});
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -33,7 +38,6 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Future<void> _charge() async {
-    double detailid = 1000000;
     double amount = double.parse(_amountTenderController.text);
     double change = amount - widget.total;
 
@@ -51,7 +55,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
     print(widget.cart);
     final results = await SalesDetailAPI().sendtransaction(
-        detailid.toString(),
+        widget.detailid.toString(),
         '1000',
         'dev42',
         widget.paymenttype,
@@ -60,6 +64,17 @@ class _TransactionPageState extends State<TransactionPage> {
 
     print(results);
     // final jsonData = json.encode(results['data']);
+
+    setState(() {
+      widget.incrementid;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CartPage(),
+        ),
+      );
+    });
   }
 
   @override

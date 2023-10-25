@@ -9,11 +9,15 @@ class PaymentPage extends StatefulWidget {
   double total;
   Map<String, dynamic> cart;
   List<Product> products;
+  int detailid;
+  Function() incrementid;
   PaymentPage(
       {super.key,
       required this.total,
       required this.cart,
-      required this.products});
+      required this.products,
+      required this.detailid,
+      required this.incrementid});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -56,6 +60,8 @@ class _PaymentPageState extends State<PaymentPage> {
                     paymenttype: paymentlist[index],
                     cart: widget.cart,
                     products: widget.products,
+                    detailid: widget.detailid,
+                    incrementid: widget.incrementid,
                   ),
                 ),
               );
@@ -71,7 +77,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment'),
+        title: Text('OR: ${widget.detailid} - Payment'),
       ),
       body: Center(
         child: Column(
