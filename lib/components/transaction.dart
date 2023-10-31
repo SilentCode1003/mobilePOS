@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:urbanhideoutpos/api/salesdetail.dart';
-import 'package:urbanhideoutpos/components/cart.dart';
+import 'package:smallprojectpos/api/salesdetail.dart';
+import 'package:smallprojectpos/components/cart.dart';
+import 'package:smallprojectpos/components/login.dart';
 
 class TransactionPage extends StatefulWidget {
   double total;
@@ -11,6 +12,7 @@ class TransactionPage extends StatefulWidget {
   List<Product> products;
   int detailid;
   Function() incrementid;
+  User user;
 
   TransactionPage(
       {super.key,
@@ -19,7 +21,8 @@ class TransactionPage extends StatefulWidget {
       required this.cart,
       required this.products,
       required this.detailid,
-      required this.incrementid});
+      required this.incrementid,
+      required this.user});
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -57,7 +60,7 @@ class _TransactionPageState extends State<TransactionPage> {
     final results = await SalesDetailAPI().sendtransaction(
         widget.detailid.toString(),
         '1000',
-        'dev42',
+        widget.user.fullname,
         widget.paymenttype,
         jsonEncode(itemlist),
         widget.total.toString());
@@ -71,7 +74,9 @@ class _TransactionPageState extends State<TransactionPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const CartPage(),
+          builder: (context) => CartPage(
+            user: widget.user,
+          ),
         ),
       );
     });

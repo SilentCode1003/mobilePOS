@@ -7,4 +7,5 @@ class Config {
   static const String getPaymentAPI = 'masterpayment/load';
   static const String sendTransactionAPI = 'salesdetails/save';
   static const String getDetailIDAPI = 'salesdetails/getdetailid';
+  static const String loginDAPI = 'login/login';
 }

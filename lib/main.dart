@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:urbanhideoutpos/components/cart.dart';
-import 'package:urbanhideoutpos/components/login.dart';
+import 'package:smallprojectpos/components/cart.dart';
+import 'package:smallprojectpos/components/login.dart';
+import 'package:smallprojectpos/components/settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +12,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //initialize
+    final User user = User("", 0);
+
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.from(
@@ -20,7 +25,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) =>
             LoginScreen(), // Define the route for MyDashboard
-        '/cart': (context) => const CartPage(),
+        '/cart': (context) => CartPage(
+              user: user,
+            ),
+        '/setting': (context) => const SettingsPage(),
       },
     );
   }

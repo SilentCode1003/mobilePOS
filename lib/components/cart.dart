@@ -3,28 +3,31 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:urbanhideoutpos/api/product.dart';
-import 'package:urbanhideoutpos/api/salesdetail.dart';
-import 'package:urbanhideoutpos/components/cartitem.dart';
-
-void main() {
-  runApp(CartApp());
-}
+import 'package:smallprojectpos/api/product.dart';
+import 'package:smallprojectpos/api/salesdetail.dart';
+import 'package:smallprojectpos/components/cartitem.dart';
+import 'package:smallprojectpos/components/login.dart';
+import 'package:smallprojectpos/components/settings.dart';
 
 class CartApp extends StatelessWidget {
-  const CartApp({super.key});
+  final User user;
+  CartApp({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: CartPage(),
+      home: CartPage(
+        user: user,
+      ),
     );
   }
 }
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key});
+  final User user;
+
+  CartPage({super.key, required this.user});
 
   @override
   _CartPageState createState() => _CartPageState();
@@ -160,6 +163,7 @@ class _CartPageState extends State<CartPage> {
                             removeToCart: removeToCart,
                             detailid: detailid,
                             incrementid: incrementDetailid,
+                            user: widget.user,
                           ),
                         ),
                       );
@@ -180,7 +184,7 @@ class _CartPageState extends State<CartPage> {
                 color: Colors.brown,
               ),
               child: Text(
-                'Urban Hideout cafe',
+                'Urban Hideout Cafe',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -188,8 +192,21 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
             ListTile(
+              leading: Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                // Add your action when Settings is tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.logout),
-              title: Text('Logut'),
+              title: const Text('Logout'),
               onTap: () {
                 // Add your action when Settings is tapped
                 Navigator.pushReplacementNamed(context, '/login');

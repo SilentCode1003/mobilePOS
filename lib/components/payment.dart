@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:urbanhideoutpos/api/payment.dart';
-import 'package:urbanhideoutpos/components/cart.dart';
-import 'package:urbanhideoutpos/components/transaction.dart';
+import 'package:smallprojectpos/api/payment.dart';
+import 'package:smallprojectpos/components/cart.dart';
+import 'package:smallprojectpos/components/login.dart';
+import 'package:smallprojectpos/components/transaction.dart';
 
 class PaymentPage extends StatefulWidget {
   double total;
@@ -11,13 +12,16 @@ class PaymentPage extends StatefulWidget {
   List<Product> products;
   int detailid;
   Function() incrementid;
+  User user;
+
   PaymentPage(
       {super.key,
       required this.total,
       required this.cart,
       required this.products,
       required this.detailid,
-      required this.incrementid});
+      required this.incrementid,
+      required this.user});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -62,6 +66,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     products: widget.products,
                     detailid: widget.detailid,
                     incrementid: widget.incrementid,
+                    user: widget.user,
                   ),
                 ),
               );

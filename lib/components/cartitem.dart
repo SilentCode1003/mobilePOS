@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:urbanhideoutpos/components/cart.dart';
-import 'package:urbanhideoutpos/components/payment.dart';
+import 'package:smallprojectpos/components/cart.dart';
+import 'package:smallprojectpos/components/login.dart';
+import 'package:smallprojectpos/components/payment.dart';
 
 class CartItemPage extends StatefulWidget {
   final Map<String, int> cart;
@@ -10,6 +11,7 @@ class CartItemPage extends StatefulWidget {
   final List<Product> products;
   final int detailid;
   final Function() incrementid;
+  User user;
 
   CartItemPage(
       {required this.cart,
@@ -18,7 +20,8 @@ class CartItemPage extends StatefulWidget {
       required this.products,
       required this.removeToCart,
       required this.detailid,
-      required this.incrementid});
+      required this.incrementid,
+      required this.user});
 
   @override
   _CartItemPageState createState() => _CartItemPageState();
@@ -130,6 +133,7 @@ class _CartItemPageState extends State<CartItemPage> {
                       products: widget.products,
                       detailid: widget.detailid,
                       incrementid: widget.incrementid,
+                      user: widget.user,
                     ),
                   ),
                 );
