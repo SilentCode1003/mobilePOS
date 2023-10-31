@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:smallprojectpos/api/login.dart';
 import 'package:smallprojectpos/components/cart.dart';
+import 'package:smallprojectpos/components/loadingspinner.dart';
+import 'package:smallprojectpos/components/settings.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -12,8 +14,16 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   User user = User("", 0);
+  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+
+
   Future<void> login() async {
     final BuildContext capturedContext = context;
     try {

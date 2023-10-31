@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:smallprojectpos/api/salesdetail.dart';
 import 'package:smallprojectpos/components/cart.dart';
 import 'package:smallprojectpos/components/login.dart';
+import 'package:smallprojectpos/repository/database.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 
 class TransactionPage extends StatefulWidget {
   double total;
@@ -34,6 +36,10 @@ class _TransactionPageState extends State<TransactionPage> {
       TextEditingController();
   List<Map<String, dynamic>> itemlist = [];
 
+  DatabaseHelper dh = DatabaseHelper();
+  String posname = '';
+  int posid = 0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -41,8 +47,19 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Future<void> _charge() async {
+    Database db = await dh.database;
+    List<Map<String, dynamic>> posconfig = await db.query('pos');
+
     double amount = double.parse(_amountTenderController.text);
     double change = amount - widget.total;
+
+    for (var pos in posconfig) {
+      print(
+          '${pos['posid']} ${pos['posname']} ${pos['serial']} ${pos['min']} ${pos['ptu']}');
+      posname = pos['posname'];
+      posid = pos['posid'];
+      setState(() {});
+    }
 
     for (int index = 0; index < widget.cart.length; index++) {
       String product = widget.cart.keys.elementAt(index);
@@ -59,7 +76,7 @@ class _TransactionPageState extends State<TransactionPage> {
     print(widget.cart);
     final results = await SalesDetailAPI().sendtransaction(
         widget.detailid.toString(),
-        '1000',
+        posid.toString(),
         widget.user.fullname,
         widget.paymenttype,
         jsonEncode(itemlist),

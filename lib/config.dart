@@ -8,4 +8,6 @@ class Config {
   static const String sendTransactionAPI = 'salesdetails/save';
   static const String getDetailIDAPI = 'salesdetails/getdetailid';
   static const String loginDAPI = 'login/login';
+  static const String posAPI = 'masterpos/getpos';
+  static const String storeAPI = 'masterstore/getstore';
 }
