@@ -47,6 +47,13 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Future<void> _charge() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        });
+
     Database db = await dh.database;
     List<Map<String, dynamic>> posconfig = await db.query('pos');
 
@@ -87,16 +94,44 @@ class _TransactionPageState extends State<TransactionPage> {
 
     setState(() {
       widget.incrementid;
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CartPage(
-            user: widget.user,
-          ),
-        ),
-      );
     });
+
+    Navigator.of(context).pop();
+
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Warning'),
+            content: const Text('Username and Password not match!'),
+            actions: [
+              ElevatedButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Send Receipt',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  )),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CartPage(
+                        user: widget.user,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   @override
