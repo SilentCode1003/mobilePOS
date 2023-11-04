@@ -53,7 +53,7 @@ class _TransactionPageState extends State<TransactionPage> {
     super.initState();
   }
 
-  Future<void> _charge() async {
+  Future<void> _charge(double cash) async {
     try {
       String paymenttype = widget.paymenttype;
       String customerid = _customerIDController.text;
@@ -156,7 +156,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
       print(detaillist);
 
-      if (widget.total < cash) {
+      if (cash < widget.total) {
         Navigator.of(context).pop();
         showDialog(
             context: context,
@@ -165,7 +165,7 @@ class _TransactionPageState extends State<TransactionPage> {
               return AlertDialog(
                 title: const Text('Insufficient Funds'),
                 content: Text(
-                    '${widget.total} is the total bill, but you tender only $amounttender'),
+                    '${widget.total} is the total bill, but you tender only $cash'),
                 actions: [
                   ElevatedButton(
                     onPressed: () {
@@ -342,7 +342,6 @@ class _TransactionPageState extends State<TransactionPage> {
               const SizedBox(
                 height: 10,
               ),
-              
               Container(
                 constraints: const BoxConstraints(
                   minWidth: 200.0,
@@ -357,9 +356,14 @@ class _TransactionPageState extends State<TransactionPage> {
                   ],
                   onChanged: (value) {
                     // Remove currency symbols and commas to get the numeric value
+                    String numericValue = value.replaceAll(
+                      RegExp('[,]'),
+                      '',
+                    );
 
                     setState(() {
-                      cash = double.tryParse(value) ?? 0;
+                      cash = double.tryParse(numericValue) ?? 0;
+                      print(cash);
                     });
                   },
                   decoration: const InputDecoration(
@@ -381,7 +385,7 @@ class _TransactionPageState extends State<TransactionPage> {
         height: 60,
         child: ElevatedButton(
             onPressed: () {
-              _charge();
+              _charge(cash);
             },
             child: const Text(
               'CHARGE',
