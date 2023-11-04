@@ -39,6 +39,7 @@ class _TransactionPageState extends State<TransactionPage> {
       TextEditingController();
   final TextEditingController _customerIDController = TextEditingController();
   List<Map<String, dynamic>> itemlist = [];
+  List<Map<String, dynamic>> detaillist = [];
 
   DatabaseHelper dh = DatabaseHelper();
   String posname = '';
@@ -118,46 +119,128 @@ class _TransactionPageState extends State<TransactionPage> {
         List<Map<String, dynamic>> posconfig = await db.query('pos');
 
         for (var pos in posconfig) {
-          print(
-              '${pos['posid']} ${pos['posname']} ${pos['serial']} ${pos['min']} ${pos['ptu']}');
+          // print(
+          //     '${pos['posid']} ${pos['posname']} ${pos['serial']} ${pos['min']} ${pos['ptu']}');
           posname = pos['posname'];
           posid = pos['posid'];
           setState(() {});
         }
+      }
+      // double cashtender = double.tryParse(_amountTenderController.text) ?? 0;
+      double change = cash - widget.total;
 
-        for (int index = 0; index < widget.cart.length; index++) {
-          String product = widget.cart.keys.elementAt(index);
-          int? quantity = widget.cart[product];
-          Product? productData = widget.products.firstWhere(
-            (p) => p.name == product,
-            orElse: () => Product("Product Not Found", 0.0, ""),
-          );
+      for (int index = 0; index < widget.cart.length; index++) {
+        String product = widget.cart.keys.elementAt(index);
+        int? quantity = widget.cart[product];
+        Product? productData = widget.products.firstWhere(
+          (p) => p.name == product,
+          orElse: () => Product("Product Not Found", 0.0, ""),
+        );
 
-          itemlist.add({
-            'name': product,
-            'price': productData.price,
-            'quantity': quantity,
-            if (paymenttype == "UH POINTS") 'customerid': customerid
-          });
-        }
+        itemlist.add({
+          'name': product,
+          'price': productData.price,
+          'quantity': quantity,
+        });
+      }
 
-        double amount = double.parse(amounttender);
-        double change = amount - widget.total;
+      detaillist.add({
+        'items': itemlist,
+        if (paymenttype == 'CASH') 'cash': cash,
+        if (paymenttype != 'CASH' && paymenttype != 'UH POINTS') 'ecash': cash,
+        if (paymenttype != 'CASH' && paymenttype != 'UH POINTS')
+          'reference': referenceno,
+        if (paymenttype == "UH POINTS") 'customerid': customerid,
+        if (paymenttype == "UH POINTS") 'points': cash,
+      });
 
-        if (amount < widget.total) {
-          Navigator.of(context).pop();
+      print(detaillist);
+
+      if (widget.total < cash) {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Insufficient Funds'),
+                content: Text(
+                    '${widget.total} is the total bill, but you tender only $amounttender'),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              );
+            });
+      } else {
+        final results = await SalesDetailAPI().sendtransaction(
+            widget.detailid.toString(),
+            posid.toString(),
+            widget.user.fullname,
+            widget.paymenttype,
+            jsonEncode(itemlist),
+            widget.total.toString());
+
+        Navigator.of(context).pop();
+
+        if (results['msg'] != 'success') {
           showDialog(
               context: context,
               barrierDismissible: false,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: const Text('Insufficient Funds'),
-                  content: Text(
-                      '${widget.total} is the total bill, but you tender only $amounttender'),
+                  title: const Text('Failed'),
+                  content: Text('${results['msg']}'),
                   actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'))
+                  ],
+                );
+              });
+        } else {
+          setState(() {
+            widget.incrementid;
+          });
+
+          Navigator.of(context).pop();
+
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Transaction Complete'),
+                  content: Text(
+                      'Cash:${formatAsCurrency(cash)}\nTotal:${formatAsCurrency(widget.total)}\nChange: ${formatAsCurrency(change)}'),
+                  actions: [
+                    // ElevatedButton(
+                    //     onPressed: () {},
+                    //     child: const Text(
+                    //       'Send Receipt',
+                    //       style: TextStyle(
+                    //           fontSize: 16, fontWeight: FontWeight.w600),
+                    //     )),
+
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CartPage(
+                              user: widget.user,
+                            ),
+                          ),
+                        );
                       },
                       child: const Text(
                         'OK',
@@ -168,76 +251,6 @@ class _TransactionPageState extends State<TransactionPage> {
                   ],
                 );
               });
-        } else {
-          final results = await SalesDetailAPI().sendtransaction(
-              widget.detailid.toString(),
-              posid.toString(),
-              widget.user.fullname,
-              widget.paymenttype,
-              jsonEncode(itemlist),
-              widget.total.toString());
-
-          Navigator.of(context).pop();
-
-          if (results['msg'] != 'success') {
-            showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Failed'),
-                    content: Text('${results['msg']}'),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('OK'))
-                    ],
-                  );
-                });
-          } else {
-            setState(() {
-              widget.incrementid;
-            });
-
-            Navigator.of(context).pop();
-
-            showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Success'),
-                    content: const Text('Transaction Complete!'),
-                    actions: [
-                      ElevatedButton(
-                          onPressed: () {},
-                          child: const Text(
-                            'Send Receipt',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600),
-                          )),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CartPage(
-                                user: widget.user,
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  );
-                });
-          }
         }
       }
 
@@ -326,11 +339,10 @@ class _TransactionPageState extends State<TransactionPage> {
                     ),
                   ),
                 ),
-              if (widget.paymenttype != 'CASH' ||
-                  widget.paymenttype == 'UH POINTS')
-                const SizedBox(
-                  height: 10,
-                ),
+              const SizedBox(
+                height: 10,
+              ),
+              
               Container(
                 constraints: const BoxConstraints(
                   minWidth: 200.0,
