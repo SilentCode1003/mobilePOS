@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:smallprojectpos/api/pos.dart';
-import 'package:smallprojectpos/api/store.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/repository/database.dart';
+import 'package:uhpos/api/pos.dart';
+import 'package:uhpos/api/store.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -365,7 +365,7 @@ class _LoadSpinnerState extends State<LoadSpinner> {
             ),
             circularStrokeCap: CircularStrokeCap.round,
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           Text(
@@ -376,6 +376,8 @@ class _LoadSpinnerState extends State<LoadSpinner> {
             height: 10,
           ),
           ElevatedButton(
+              style: const ButtonStyle(
+                  minimumSize: MaterialStatePropertyAll(Size(200, 80))),
               onPressed: () {
                 Navigator.of(context).pop();
               },

@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/api/salesdetail.dart';
-import 'package:smallprojectpos/components/cart.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/repository/database.dart';
+import 'package:flutter/services.dart';
+import 'package:uhpos/api/salesdetail.dart';
+import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:uhpos/repository/helper.dart';
 
 class TransactionPage extends StatefulWidget {
   double total;
@@ -34,11 +37,14 @@ class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController _amountTenderController = TextEditingController();
   final TextEditingController _paymentReferenceController =
       TextEditingController();
+  final TextEditingController _customerIDController = TextEditingController();
   List<Map<String, dynamic>> itemlist = [];
 
   DatabaseHelper dh = DatabaseHelper();
   String posname = '';
   int posid = 0;
+
+  double cash = 0;
 
   @override
   void initState() {
@@ -47,105 +53,228 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Future<void> _charge() async {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Center(child: CircularProgressIndicator());
-        });
+    try {
+      String paymenttype = widget.paymenttype;
+      String customerid = _customerIDController.text;
+      String amounttender = _amountTenderController.text;
+      String referenceno = _paymentReferenceController.text;
+      String message = '';
 
-    Database db = await dh.database;
-    List<Map<String, dynamic>> posconfig = await db.query('pos');
+      if (paymenttype != "CASH") {
+        if (paymenttype == "UH POINTS") {
+          if (customerid == '') {
+            message += 'Customer ID ';
+          }
+          if (amounttender == '') {
+            message += 'Cash ';
+          }
+        } else {
+          if (referenceno == '') {
+            message += 'Reference No. ';
+          }
 
-    double amount = double.parse(_amountTenderController.text);
-    double change = amount - widget.total;
+          if (amounttender == '') {
+            message += 'Cash ';
+          }
+        }
+      } else {
+        if (amounttender == '') {
+          message += 'Cash ';
+        }
+      }
 
-    for (var pos in posconfig) {
-      print(
-          '${pos['posid']} ${pos['posname']} ${pos['serial']} ${pos['min']} ${pos['ptu']}');
-      posname = pos['posname'];
-      posid = pos['posid'];
-      setState(() {});
-    }
+      if (message != '') {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Empty'),
+                content:
+                    Text('Do not leave blank inputs especially [$message]'),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              );
+            });
+      } else {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return const Center(child: CircularProgressIndicator());
+            });
 
-    for (int index = 0; index < widget.cart.length; index++) {
-      String product = widget.cart.keys.elementAt(index);
-      int? quantity = widget.cart[product];
-      Product? productData = widget.products.firstWhere(
-        (p) => p.name == product,
-        orElse: () => Product("Product Not Found", 0.0, ""),
-      );
+        Database db = await dh.database;
+        List<Map<String, dynamic>> posconfig = await db.query('pos');
 
-      itemlist.add(
-          {'name': product, 'price': productData.price, 'quantity': quantity});
-    }
+        for (var pos in posconfig) {
+          print(
+              '${pos['posid']} ${pos['posname']} ${pos['serial']} ${pos['min']} ${pos['ptu']}');
+          posname = pos['posname'];
+          posid = pos['posid'];
+          setState(() {});
+        }
 
-    print(widget.cart);
-    final results = await SalesDetailAPI().sendtransaction(
-        widget.detailid.toString(),
-        posid.toString(),
-        widget.user.fullname,
-        widget.paymenttype,
-        jsonEncode(itemlist),
-        widget.total.toString());
+        for (int index = 0; index < widget.cart.length; index++) {
+          String product = widget.cart.keys.elementAt(index);
+          int? quantity = widget.cart[product];
+          Product? productData = widget.products.firstWhere(
+            (p) => p.name == product,
+            orElse: () => Product("Product Not Found", 0.0, ""),
+          );
 
-    print(results);
-    // final jsonData = json.encode(results['data']);
+          itemlist.add({
+            'name': product,
+            'price': productData.price,
+            'quantity': quantity,
+            if (paymenttype == "UH POINTS") 'customerid': customerid
+          });
+        }
 
-    setState(() {
-      widget.incrementid;
-    });
+        double amount = double.parse(amounttender);
+        double change = amount - widget.total;
 
-    Navigator.of(context).pop();
-
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Warning'),
-            content: const Text('Username and Password not match!'),
-            actions: [
-              ElevatedButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Send Receipt',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  )),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CartPage(
-                        user: widget.user,
+        if (amount < widget.total) {
+          Navigator.of(context).pop();
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Insufficient Funds'),
+                  content: Text(
+                      '${widget.total} is the total bill, but you tender only $amounttender'),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),
+                  ],
+                );
+              });
+        } else {
+          final results = await SalesDetailAPI().sendtransaction(
+              widget.detailid.toString(),
+              posid.toString(),
+              widget.user.fullname,
+              widget.paymenttype,
+              jsonEncode(itemlist),
+              widget.total.toString());
+
+          Navigator.of(context).pop();
+
+          if (results['msg'] != 'success') {
+            showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Failed'),
+                    content: Text('${results['msg']}'),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'))
+                    ],
                   );
-                },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          );
-        });
+                });
+          } else {
+            setState(() {
+              widget.incrementid;
+            });
+
+            Navigator.of(context).pop();
+
+            showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Success'),
+                    content: const Text('Transaction Complete!'),
+                    actions: [
+                      ElevatedButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'Send Receipt',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
+                          )),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CartPage(
+                                user: widget.user,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  );
+                });
+          }
+        }
+      }
+
+      // final jsonData = json.encode(results['data']);
+    } catch (e) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text('$e'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'))
+              ],
+            );
+          });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.paymenttype} - \₱${widget.total}'),
+        title:
+            Text('${widget.paymenttype} - ${formatAsCurrency(widget.total)}'),
       ),
       body: Center(
         child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.paymenttype != 'CASH')
+              if (widget.paymenttype != 'CASH' &&
+                  widget.paymenttype != 'UH POINTS')
                 Container(
                   constraints: const BoxConstraints(
                     minWidth: 200.0,
@@ -154,6 +283,9 @@ class _TransactionPageState extends State<TransactionPage> {
                   child: TextField(
                     controller: _paymentReferenceController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]')),
+                    ],
                     decoration: const InputDecoration(
                       focusedBorder: OutlineInputBorder(
                         borderSide:
@@ -168,7 +300,34 @@ class _TransactionPageState extends State<TransactionPage> {
                     ),
                   ),
                 ),
-              if (widget.paymenttype != 'CASH')
+              if (widget.paymenttype == 'UH POINTS')
+                Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 200.0,
+                    maxWidth: 380.0,
+                  ),
+                  child: TextField(
+                    controller: _customerIDController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]')),
+                    ],
+                    decoration: const InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                      ),
+                      labelText: 'Customer ID',
+                      labelStyle:
+                          TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter Customer ID',
+                      prefixIcon: Icon(Icons.person_3),
+                    ),
+                  ),
+                ),
+              if (widget.paymenttype != 'CASH' ||
+                  widget.paymenttype == 'UH POINTS')
                 const SizedBox(
                   height: 10,
                 ),
@@ -180,6 +339,17 @@ class _TransactionPageState extends State<TransactionPage> {
                 child: TextField(
                   controller: _amountTenderController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    // FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]')),
+                    CurrencyInputFormatter()
+                  ],
+                  onChanged: (value) {
+                    // Remove currency symbols and commas to get the numeric value
+
+                    setState(() {
+                      cash = double.tryParse(value) ?? 0;
+                    });
+                  },
                   decoration: const InputDecoration(
                     focusedBorder: OutlineInputBorder(
                       borderSide:
@@ -196,14 +366,14 @@ class _TransactionPageState extends State<TransactionPage> {
             ]),
       ),
       bottomNavigationBar: Container(
-        height: 80,
+        height: 60,
         child: ElevatedButton(
             onPressed: () {
               _charge();
             },
             child: const Text(
               'CHARGE',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
             )),
       ),
     );

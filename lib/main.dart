@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/components/cart.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/components/settings.dart';
-import 'package:smallprojectpos/repository/database.dart';
+import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/components/settings.dart';
+import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //initialize
-    final User user = User("", 0);
+    final User user = User("", "");
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

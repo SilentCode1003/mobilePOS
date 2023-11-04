@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/api/payment.dart';
-import 'package:smallprojectpos/components/cart.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/components/transaction.dart';
+import 'package:uhpos/api/payment.dart';
+import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/components/transaction.dart';
+import 'package:uhpos/repository/helper.dart';
 
 class PaymentPage extends StatefulWidget {
   double total;
@@ -91,7 +92,7 @@ class _PaymentPageState extends State<PaymentPage> {
               height: 40,
             ),
             Text(
-              'Total: \₱${widget.total.toString()}',
+              'Total: ${formatAsCurrency(widget.total)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 36),
             ),
             const SizedBox(

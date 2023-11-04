@@ -1,4 +1,4 @@
-package com.example.smallprojectpos
+package com.example.uhpos
 
 import io.flutter.embedding.android.FlutterActivity
 

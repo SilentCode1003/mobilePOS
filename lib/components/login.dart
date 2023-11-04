@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/api/login.dart';
-import 'package:smallprojectpos/components/cart.dart';
-import 'package:smallprojectpos/components/loadingspinner.dart';
-import 'package:smallprojectpos/components/settings.dart';
+import 'package:uhpos/api/login.dart';
+import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/loadingspinner.dart';
+import 'package:uhpos/components/settings.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -14,15 +14,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  User user = User("", 0);
-  
+  User user = User("", "");
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
   }
-
-
 
   Future<void> login() async {
     final BuildContext capturedContext = context;
@@ -68,8 +66,8 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           setState(() {
             for (var data in json.decode(jsonData)) {
-              print('${data['fullname']} ${data['accessid']}');
-              user = User(data['fullname'], data['accessid']);
+              print('${data['fullname']} ${data['accesstype']}');
+              user = User(data['fullname'], data['accesstype']);
             }
           });
 
@@ -147,7 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 40),
             const Text(
               'Urban Hideout POS',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 10,
             ),
             Container(
               constraints: const BoxConstraints(
@@ -156,8 +157,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: TextField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  labelText: 'Username',
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Username',
+                  prefixIcon: Icon(Icons.person),
+                ),
               ),
+            ),
+            const SizedBox(
+              height: 10,
             ),
             Container(
               constraints: const BoxConstraints(
@@ -166,23 +181,40 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  labelText: 'Password',
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Password',
+                  prefixIcon: Icon(Icons.password),
+                ),
                 obscureText: true,
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Navigator.pushReplacementNamed(context, '/cart');
-                login();
-              },
-              style: ElevatedButton.styleFrom(
-                  side: const BorderSide(width: 2),
-                  textStyle: const TextStyle(
-                      fontSize: 48, fontStyle: FontStyle.normal)),
-              child: const Text(
-                'LOGIN',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 200.0,
+                maxWidth: 280.0,
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigator.pushReplacementNamed(context, '/cart');
+                  login();
+                },
+                style: ElevatedButton.styleFrom(
+                    side: const BorderSide(width: 2),
+                    textStyle: const TextStyle(
+                        fontSize: 32, fontStyle: FontStyle.normal)),
+                child: const Text(
+                  'LOGIN',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
@@ -195,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
 //User Class
 class User {
   final String fullname;
-  final int access;
+  final String access;
 
   User(this.fullname, this.access);
 

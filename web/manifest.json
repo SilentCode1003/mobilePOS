@@ -1,6 +1,6 @@
 {
-    "name": "smallprojectpos",
-    "short_name": "smallprojectpos",
+    "name": "uhpos",
+    "short_name": "uhpos",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

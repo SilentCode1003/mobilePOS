@@ -3,11 +3,11 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:smallprojectpos/api/product.dart';
-import 'package:smallprojectpos/api/salesdetail.dart';
-import 'package:smallprojectpos/components/cartitem.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/components/settings.dart';
+import 'package:uhpos/api/product.dart';
+import 'package:uhpos/api/salesdetail.dart';
+import 'package:uhpos/components/cartitem.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/components/settings.dart';
 
 class CartApp extends StatelessWidget {
   final User user;

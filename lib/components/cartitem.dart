@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:smallprojectpos/components/cart.dart';
-import 'package:smallprojectpos/components/login.dart';
-import 'package:smallprojectpos/components/payment.dart';
+import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/login.dart';
+import 'package:uhpos/components/payment.dart';
 
 class CartItemPage extends StatefulWidget {
   final Map<String, int> cart;
@@ -122,6 +122,7 @@ class _CartItemPageState extends State<CartItemPage> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('Total Price: \₱${total.toStringAsFixed(2)}'),
             trailing: ElevatedButton(
+              style: const ButtonStyle(minimumSize: MaterialStatePropertyAll(Size(120,80))),
               onPressed: () {
                 // Add your action when the "Confirm Payment" button is pressed here.
                 Navigator.push(
