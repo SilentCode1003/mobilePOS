@@ -242,7 +242,7 @@ class _TransactionPageState extends State<TransactionPage> {
               posid.toString(),
               widget.user.fullname,
               widget.paymenttype,
-              jsonEncode(itemlist),
+              jsonEncode(detaillist),
               widget.total.toString());
 
           Navigator.of(context).pop();
