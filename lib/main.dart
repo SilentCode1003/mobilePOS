@@ -6,6 +6,7 @@ import 'package:uhpos/components/login.dart';
 import 'package:uhpos/components/settings.dart';
 import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:uhpos/components/syncing.dart';
 
 void main() {
   if (Platform.isAndroid) {
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/setting', // Set the initial route
       routes: {
         '/setting': (context) => SettingsPage(),
+        '/syncing': (context) => SyncingPage(),
         '/login': (context) =>
             LoginScreen(), // Define the route for MyDashboard
         '/cart': (context) => CartPage(

@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:uhpos/api/product.dart';
 import 'package:uhpos/api/salesdetail.dart';
 import 'package:uhpos/components/cartitem.dart';
 import 'package:uhpos/components/login.dart';
+import 'package:uhpos/components/product.dart';
 import 'package:uhpos/components/settings.dart';
+import 'package:uhpos/components/syncing.dart';
 
 class CartApp extends StatelessWidget {
   final User user;
@@ -192,6 +193,23 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
             ListTile(
+              leading: Icon(Icons.food_bank),
+              title: const Text('Products'),
+              onTap: () {
+                // Add your action when Settings is tapped
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProductPage(),
+                  ),
+                );
+              },
+            ),
+            SizedBox(
+              height: 120,
+            ),
+            Divider(),
+            ListTile(
               leading: Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
@@ -199,7 +217,7 @@ class _CartPageState extends State<CartPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SettingsPage(),
+                    builder: (context) => const SyncingPage(),
                   ),
                 );
               },
