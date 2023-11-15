@@ -17,6 +17,7 @@ class _EditProductPageState extends State<EditProductPage> {
   final TextEditingController _priceController = TextEditingController();
   String description = '';
   String image = '';
+  String status = '';
 
   File? _selectedImage;
 
@@ -45,8 +46,9 @@ class _EditProductPageState extends State<EditProductPage> {
           image = data['image'];
           price = data['price'];
           description = data['description'];
+          status = data['status'];
 
-          _priceController.text = pricetotal.toStringAsFixed(3).toString();
+          _priceController.text = pricetotal.toStringAsFixed(2).toString();
         }
       });
     } catch (e) {
@@ -68,13 +70,12 @@ class _EditProductPageState extends State<EditProductPage> {
   }
 
   Future<void> _updateproduct(
-      String description, String image, String price) async {
+      String description, String image, String price, String status) async {
     try {
       print('$description $image $price');
       final results =
-          await ProductAPI().updateProduct(description, image, price);
+          await ProductAPI().updateProduct(description, image, price, status);
       final jsonData = json.encode(results['data']);
-
 
       if (results['msg'] == 'success') {
         showDialog(
@@ -129,7 +130,9 @@ class _EditProductPageState extends State<EditProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit $description',),
+        title: Text(
+          'Edit $description',
+        ),
       ),
       body: Container(
         padding: EdgeInsets.all(16),
@@ -148,7 +151,9 @@ class _EditProductPageState extends State<EditProductPage> {
                 onPressed: () {
                   _pickImage();
                 },
-                child: const Text('Browse',style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600))),
+                child: const Text('Browse',
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.w600))),
             SizedBox(
               height: 20,
             ),
@@ -166,6 +171,26 @@ class _EditProductPageState extends State<EditProductPage> {
                 prefixIcon: Icon(Icons.store),
               ),
             ),
+            SizedBox(
+              height: 40,
+            ),
+            Container(
+                height: 60,
+                child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (status == "ACTIVE") {
+                          status = 'INACTIVE';
+                        } else if (status == "INACTIVE") {
+                          status = 'ACTIVE';
+                        }
+
+                        print(status);
+                      });
+                    },
+                    child: Text('$status',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600))))
           ],
         ),
       ),
@@ -175,7 +200,7 @@ class _EditProductPageState extends State<EditProductPage> {
             onPressed: () {
               setState(() {
                 String price = _priceController.text;
-                _updateproduct(description, image, price);
+                _updateproduct(description, image, price, status);
               });
             },
             child: const Text(

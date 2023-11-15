@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
 import 'package:uhpos/api/customercredit.dart';
 import 'package:uhpos/api/salesdetail.dart';
 import 'package:uhpos/components/cart.dart';
@@ -10,17 +12,19 @@ import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:uhpos/repository/helper.dart';
+import 'package:uhpos/repository/receipt.dart';
+import 'package:printing/printing.dart';
 
 class TransactionPage extends StatefulWidget {
-  double total;
-  String paymenttype;
-  Map<String, dynamic> cart;
-  List<Product> products;
-  int detailid;
-  Function() incrementid;
-  User user;
+  final double total;
+  final String paymenttype;
+  final Map<String, dynamic> cart;
+  final List<Product> products;
+  final int detailid;
+  final Function() incrementid;
+  final User user;
 
-  TransactionPage(
+  const TransactionPage(
       {super.key,
       required this.total,
       required this.paymenttype,
@@ -95,7 +99,7 @@ class _TransactionPageState extends State<TransactionPage> {
       }
 
       if (message != '') {
-          Navigator.of(context).pop();
+        Navigator.of(context).pop();
         showDialog(
             context: context,
             barrierDismissible: false,
@@ -125,7 +129,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
           if (results['msg'] == 'success') {
             if (jsonData.length == 2) {
-               Navigator.of(context).pop();
+              Navigator.of(context).pop();
               return showDialog(
                   context: context,
                   builder: (context) {
@@ -147,7 +151,7 @@ class _TransactionPageState extends State<TransactionPage> {
                 double credit = balance.toDouble();
 
                 if (credit < cash) {
-                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   return showDialog(
                       context: context,
                       builder: (context) {
@@ -269,6 +273,22 @@ class _TransactionPageState extends State<TransactionPage> {
 
             Navigator.of(context).pop();
 
+            final pdfBytes = await Receipt(itemlist, widget.total, change, cash)
+                .printReceipt();
+
+            // print(pdfBytes);
+
+            if (Platform.isWindows) {
+              List<Printer> printerList = await Printing.listPrinters();
+              for (var printer in printerList) {
+                if (printer.isDefault) {
+                  Printing.directPrintPdf(
+                      printer: printer,
+                      onLayout: (PdfPageFormat format) => pdfBytes);
+                }
+              }
+            }
+
             showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -278,14 +298,13 @@ class _TransactionPageState extends State<TransactionPage> {
                     content: Text(
                         'Cash:${formatAsCurrency(cash)}\nTotal:${formatAsCurrency(widget.total)}\nChange: ${formatAsCurrency(change)}'),
                     actions: [
-                      // ElevatedButton(
-                      //     onPressed: () {},
-                      //     child: const Text(
-                      //       'Send Receipt',
-                      //       style: TextStyle(
-                      //           fontSize: 16, fontWeight: FontWeight.w600),
-                      //     )),
-
+                      ElevatedButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'Send Receipt',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
+                          )),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();

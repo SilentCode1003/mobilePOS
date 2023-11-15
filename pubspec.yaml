@@ -43,6 +43,9 @@ dependencies:
   percent_indicator: ^4.2.3
   flutter_multi_formatter: ^2.11.16
   image_picker: ^1.0.4
+  pdf: ^3.10.6
+  printing: ^5.11.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

@@ -134,6 +134,12 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title: const Text('Urban Hideout Cafe'),
         actions: [
+          IconButton(onPressed: () {
+            Navigator.pushReplacementNamed(context, '/cart');
+          }, icon: Icon(Icons.refresh)),
+          SizedBox(
+            width: double.minPositive,
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

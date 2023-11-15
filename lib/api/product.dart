@@ -52,10 +52,14 @@ class ProductAPI {
   }
 
   Future<Map<String, dynamic>> updateProduct(
-      String description, String image, String price) async {
+      String description, String image, String price, String stat) async {
     final url = Uri.parse('${Config.apiUrl}${Config.updateProductAPI}');
-    final response = await http.post(url,
-        body: {'description': description, 'image': image, 'price': price});
+    final response = await http.post(url, body: {
+      'description': description,
+      'image': image,
+      'price': price,
+      'status': stat
+    });
 
     final responseData = json.decode(response.body);
     final status = response.statusCode;

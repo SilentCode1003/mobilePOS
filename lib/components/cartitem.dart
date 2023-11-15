@@ -53,34 +53,37 @@ class _CartItemPageState extends State<CartItemPage> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    widget.addToCart(product);
-                    setState(() {});
-                  },
-                  child: const Text("+"),
-                ),
+                IconButton(
+                    onPressed: () {
+                      widget.addToCart(product);
+                      setState(() {});
+                    },
+                    icon: const Icon(
+                      Icons.plus_one_rounded,
+                      color: Colors.brown,
+                    )),
                 const SizedBox(
                     width: 5), // Add some spacing between the buttons
-                ElevatedButton(
-                  onPressed: () {
-                    widget.deductToCart(product);
-                    setState(() {});
-                  },
-                  child: const Text("-"),
-                ),
+                IconButton(
+                    onPressed: () {
+                      widget.deductToCart(product);
+                      setState(() {});
+                    },
+                    icon: const Icon(
+                      Icons.exposure_minus_1_rounded,
+                      color: Colors.brown,
+                    )),
                 const SizedBox(
-                    width: 16), // Add some spacing between the buttons
-                ElevatedButton.icon(
+                    width: 5), // Add some spacing between the buttons
+                IconButton(
                     onPressed: () {
                       widget.removeToCart(product);
                       setState(() {});
                     },
                     icon: const Icon(
                       Icons.delete,
-                      color: Colors.white,
-                    ),
-                    label: const Text('REMOVE')),
+                      color: Colors.brown,
+                    ))
               ],
             ),
           ),
@@ -122,7 +125,8 @@ class _CartItemPageState extends State<CartItemPage> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('Total Price: \₱${total.toStringAsFixed(2)}'),
             trailing: ElevatedButton(
-              style: const ButtonStyle(minimumSize: MaterialStatePropertyAll(Size(120,80))),
+              style: const ButtonStyle(
+                  minimumSize: MaterialStatePropertyAll(Size(120, 80))),
               onPressed: () {
                 // Add your action when the "Confirm Payment" button is pressed here.
                 Navigator.push(
