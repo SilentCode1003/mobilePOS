@@ -18,6 +18,11 @@ class SyncingPage extends StatefulWidget {
 class _SyncingPageState extends State<SyncingPage> {
   final TextEditingController _storeController = TextEditingController();
   final TextEditingController _posController = TextEditingController();
+  final TextEditingController _emailaddressController = TextEditingController();
+  final TextEditingController _emailpasswordController =
+      TextEditingController();
+  final TextEditingController _emailSMTPController = TextEditingController();
+
   final DatabaseHelper dh = DatabaseHelper();
   bool issync = false;
   double statuspercentage = 0;
@@ -105,6 +110,9 @@ class _SyncingPageState extends State<SyncingPage> {
     final BuildContext capturedContext = context;
     String storeid = _storeController.text;
     String posid = _posController.text;
+    String emailaddress = _emailaddressController.text;
+    String emailpassword = _emailpasswordController.text;
+    String smtpserver = _emailSMTPController.text;
 
     if (storeid == '' || posid == '') {
       showDialog(
@@ -129,6 +137,9 @@ class _SyncingPageState extends State<SyncingPage> {
             return LoadSpinner(
               storeid: storeid,
               posid: posid,
+              emailaddress: emailaddress,
+              emailpassword: emailpassword,
+              smtpserver: smtpserver,
             );
           });
     }
@@ -165,7 +176,7 @@ class _SyncingPageState extends State<SyncingPage> {
               ),
             ),
             const SizedBox(
-              height: 20,
+              height: 10,
             ),
             Container(
               constraints: const BoxConstraints(
@@ -188,7 +199,77 @@ class _SyncingPageState extends State<SyncingPage> {
               ),
             ),
             const SizedBox(
+              height: 30,
+            ),
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 200.0,
+                maxWidth: 380.0,
+              ),
+              child: TextField(
+                controller: _emailaddressController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  labelText: 'Email Address',
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Email Address',
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+            ),
+            const SizedBox(
               height: 10,
+            ),
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 200.0,
+                maxWidth: 380.0,
+              ),
+              child: TextField(
+                controller: _emailpasswordController,
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  labelText: 'Email Password',
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Email Password',
+                  prefixIcon: Icon(Icons.password),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 200.0,
+                maxWidth: 380.0,
+              ),
+              child: TextField(
+                controller: _emailSMTPController,
+                keyboardType: TextInputType.text,
+                decoration: const InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
+                  ),
+                  labelText: 'SMTP Server',
+                  labelStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter SMTP Server',
+                  prefixIcon: Icon(Icons.desktop_windows),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 30,
             ),
             Container(
                 constraints: const BoxConstraints(
@@ -226,10 +307,19 @@ class _SyncingPageState extends State<SyncingPage> {
 }
 
 class LoadSpinner extends StatefulWidget {
-  String storeid;
-  String posid;
+  final String storeid;
+  final String posid;
+  final String emailaddress;
+  final String emailpassword;
+  final String smtpserver;
 
-  LoadSpinner({super.key, required this.storeid, required this.posid});
+  const LoadSpinner(
+      {super.key,
+      required this.storeid,
+      required this.posid,
+      required this.emailaddress,
+      required this.emailpassword,
+      required this.smtpserver});
 
   @override
   State<LoadSpinner> createState() => _LoadSpinnerState();
@@ -246,6 +336,7 @@ class _LoadSpinnerState extends State<LoadSpinner> {
     // TODO: implement initState
     _getpos(widget.posid);
     _getstore(widget.storeid);
+    _emailconfig();
 
     super.initState();
   }
@@ -338,6 +429,38 @@ class _LoadSpinnerState extends State<LoadSpinner> {
       } else {
         return 'error';
       }
+    }
+  }
+
+  Future<void> _emailconfig() async {
+    try {
+      Database db = await dh.database;
+      List<Map<String, dynamic>> emailconfig = await db.query('email');
+
+      if (emailconfig.isEmpty) {
+        await dh.insertItem({
+          "emailaddress": widget.emailaddress,
+          "emailpassword": widget.emailpassword,
+          "emailserver": widget.smtpserver,
+        }, 'email');
+      }
+
+      for (var email in emailconfig) {
+        print(
+            '${email['emailaddress']} ${email['emailpassword']} ${email['emailserver']}');
+      }
+    } catch (e) {
+      AlertDialog(
+        title: const Text("Error"),
+        content: Text(e.toString()),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"))
+        ],
+      );
     }
   }
 

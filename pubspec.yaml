@@ -46,6 +46,8 @@ dependencies:
   pdf: ^3.10.6
   printing: ^5.11.1
   intl: ^0.18.1
+  mailer: ^6.0.1
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:

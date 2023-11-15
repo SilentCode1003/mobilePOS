@@ -7,10 +7,12 @@ import 'package:pdf/pdf.dart';
 import 'package:uhpos/api/customercredit.dart';
 import 'package:uhpos/api/salesdetail.dart';
 import 'package:uhpos/components/cart.dart';
+import 'package:uhpos/components/loadingspinner.dart';
 import 'package:uhpos/components/login.dart';
 import 'package:uhpos/repository/database.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:uhpos/repository/email.dart';
 import 'package:uhpos/repository/helper.dart';
 import 'package:uhpos/repository/receipt.dart';
 import 'package:printing/printing.dart';
@@ -24,15 +26,16 @@ class TransactionPage extends StatefulWidget {
   final Function() incrementid;
   final User user;
 
-  const TransactionPage(
-      {super.key,
-      required this.total,
-      required this.paymenttype,
-      required this.cart,
-      required this.products,
-      required this.detailid,
-      required this.incrementid,
-      required this.user});
+  const TransactionPage({
+    super.key,
+    required this.total,
+    required this.paymenttype,
+    required this.cart,
+    required this.products,
+    required this.detailid,
+    required this.incrementid,
+    required this.user,
+  });
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -43,6 +46,8 @@ class _TransactionPageState extends State<TransactionPage> {
   final TextEditingController _paymentReferenceController =
       TextEditingController();
   final TextEditingController _customerIDController = TextEditingController();
+  final TextEditingController _emailaddressController = TextEditingController();
+
   List<Map<String, dynamic>> itemlist = [];
   List<Map<String, dynamic>> detaillist = [];
 
@@ -52,6 +57,8 @@ class _TransactionPageState extends State<TransactionPage> {
 
   double cash = 0;
   double uhpoints = 0;
+
+  Email email = Email();
 
   @override
   void initState() {
@@ -249,8 +256,6 @@ class _TransactionPageState extends State<TransactionPage> {
               jsonEncode(detaillist),
               widget.total.toString());
 
-          Navigator.of(context).pop();
-
           if (results['msg'] != 'success') {
             showDialog(
                 context: context,
@@ -271,8 +276,6 @@ class _TransactionPageState extends State<TransactionPage> {
               widget.incrementid;
             });
 
-            Navigator.of(context).pop();
-
             final pdfBytes = await Receipt(
                     itemlist, widget.total, change, cash, widget.user.fullname)
                 .printReceipt();
@@ -290,17 +293,65 @@ class _TransactionPageState extends State<TransactionPage> {
               }
             }
 
+            Navigator.pop(context);
+
             showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('Transaction Complete'),
-                    content: Text(
-                        'Cash:${formatAsCurrency(cash)}\nTotal:${formatAsCurrency(widget.total)}\nChange: ${formatAsCurrency(change)}'),
+                    content: Container(
+                      height: 300,
+                      width: 180,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Cash:${formatAsCurrency(cash)}\nTotal:${formatAsCurrency(widget.total)}\nChange: ${formatAsCurrency(change)}'),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                            constraints: const BoxConstraints(
+                              minWidth: 200.0,
+                              maxWidth: 380.0,
+                            ),
+                            child: TextField(
+                              controller: _emailaddressController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 0, 0, 0)),
+                                ),
+                                labelText: 'Email Address',
+                                labelStyle: TextStyle(
+                                    color: Color.fromARGB(255, 0, 0, 0)),
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter Email Address',
+                                prefixIcon: Icon(Icons.email),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: [
                       ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            // showDialog(
+                            //     context: context,
+                            //     builder: (context) {
+                            //       return const Center(
+                            //         child: CircularProgressIndicator(),
+                            //       );
+                            //     });
+
+                            // Navigator.of(context).pop();
+                            _sendereceipt(paymenttype, referenceno, customerid);
+                          },
                           child: const Text(
                             'Send Receipt',
                             style: TextStyle(
@@ -332,6 +383,66 @@ class _TransactionPageState extends State<TransactionPage> {
       }
 
       // final jsonData = json.encode(results['data']);
+    } catch (e) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text('$e'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'))
+              ],
+            );
+          });
+    }
+  }
+
+  Future<void> _sendereceipt(
+      String paymenttype, String referenceno, String customerid) async {
+    try {
+      String customeremail = _emailaddressController.text;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          });
+
+      await email.sendEmail(
+          itemlist,
+          widget.detailid,
+          widget.user.fullname,
+          customeremail,
+          paymenttype,
+          referenceno == "" ? customerid : referenceno);
+
+      Navigator.of(context).pop();
+
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Success'),
+              content: Text('E-receipt successfully sent'),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            );
+          });
     } catch (e) {
       Navigator.of(context).pop();
       showDialog(
