@@ -273,7 +273,8 @@ class _TransactionPageState extends State<TransactionPage> {
 
             Navigator.of(context).pop();
 
-            final pdfBytes = await Receipt(itemlist, widget.total, change, cash)
+            final pdfBytes = await Receipt(
+                    itemlist, widget.total, change, cash, widget.user.fullname)
                 .printReceipt();
 
             // print(pdfBytes);

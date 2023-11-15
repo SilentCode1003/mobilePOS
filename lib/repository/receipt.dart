@@ -13,8 +13,10 @@ class Receipt {
   List<Map<String, dynamic>> itemlist = [];
   double change;
   double amounttender;
+  String cashier;
 
-  Receipt(this.itemlist, this.total, this.change, this.amounttender);
+  Receipt(
+      this.itemlist, this.total, this.change, this.amounttender, this.cashier);
 
   DatabaseHelper dh = DatabaseHelper();
   Helper helper = Helper();
@@ -131,6 +133,14 @@ class Receipt {
                               fontWeight: pw.FontWeight.bold,
                             ),
                           )),
+                    ]),
+                pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Cashier: $cashier',
+                          style: pw.TextStyle(
+                              fontSize: 8, fontWeight: pw.FontWeight.bold)),
                     ]),
                 pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
