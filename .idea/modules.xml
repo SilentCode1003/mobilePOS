@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/smallprojectpos.iml" filepath="$PROJECT_DIR$/smallprojectpos.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/smallprojectpos_android.iml" filepath="$PROJECT_DIR$/android/smallprojectpos_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/uhpos.iml" filepath="$PROJECT_DIR$/uhpos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/uhpos_android.iml" filepath="$PROJECT_DIR$/android/uhpos_android.iml" />
     </modules>
   </component>
 </project>
