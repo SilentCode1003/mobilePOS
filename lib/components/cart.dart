@@ -134,9 +134,11 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title: const Text('Urban Hideout Cafe'),
         actions: [
-          IconButton(onPressed: () {
-            Navigator.pushReplacementNamed(context, '/cart');
-          }, icon: Icon(Icons.refresh)),
+          IconButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/cart');
+              },
+              icon: Icon(Icons.refresh)),
           SizedBox(
             width: double.minPositive,
           ),
@@ -206,7 +208,9 @@ class _CartPageState extends State<CartPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ProductPage(),
+                    builder: (context) => ProductPage(
+                      user: widget.user,
+                    ),
                   ),
                 );
               },

@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:uhpos/api/product.dart';
+import 'package:uhpos/components/addproduct.dart';
 import 'package:uhpos/components/cart.dart';
 import 'package:uhpos/components/editproduct.dart';
+import 'package:uhpos/components/login.dart';
 
 class ProductPage extends StatefulWidget {
-  const ProductPage({super.key});
+  final User user;
+  const ProductPage({super.key, required this.user});
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -38,6 +41,19 @@ class _ProductPageState extends State<ProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddProductPage(user: widget.user),
+                ),
+              );
+            },
+          ), // Adjust as needed),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -67,11 +83,16 @@ class _ProductPageState extends State<ProductPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => EditProductPage(itemdescription:'${productlist[index].name}'),
+                                    builder: (context) => EditProductPage(
+                                        itemdescription:
+                                            '${productlist[index].name}'),
                                   ),
                                 );
                               },
-                              child: const Text("Edit",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
+                              child: const Text("Edit",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w600)),
                             ),
                           ),
                         )

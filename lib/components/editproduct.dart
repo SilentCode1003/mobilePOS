@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:uhpos/api/product.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,6 +19,8 @@ class _EditProductPageState extends State<EditProductPage> {
   String description = '';
   String image = '';
   String status = '';
+
+  double cash = 0;
 
   File? _selectedImage;
 
@@ -72,7 +75,7 @@ class _EditProductPageState extends State<EditProductPage> {
   Future<void> _updateproduct(
       String description, String image, String price, String status) async {
     try {
-      print('$description $image $price');
+      // print('$description $image $price');
       final results =
           await ProductAPI().updateProduct(description, image, price, status);
       final jsonData = json.encode(results['data']);
@@ -160,6 +163,22 @@ class _EditProductPageState extends State<EditProductPage> {
             TextField(
               controller: _priceController,
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                // FilteringTextInputFormatter.deny(RegExp(r'[a-zA-Z]')),
+                CurrencyInputFormatter()
+              ],
+              onChanged: (value) {
+                // Remove currency symbols and commas to get the numeric value
+                String numericValue = value.replaceAll(
+                  RegExp('[,]'),
+                  '',
+                );
+
+                setState(() {
+                  cash = double.tryParse(numericValue) ?? 0;
+                  print(cash);
+                });
+              },
               decoration: const InputDecoration(
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
@@ -199,8 +218,7 @@ class _EditProductPageState extends State<EditProductPage> {
           child: ElevatedButton(
             onPressed: () {
               setState(() {
-                String price = _priceController.text;
-                _updateproduct(description, image, price, status);
+                _updateproduct(description, image, cash.toString(), status);
               });
             },
             child: const Text(

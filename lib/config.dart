@@ -16,4 +16,5 @@ class Config {
   static const String getAllProductAPI = 'product/load';
   static const String getProductInfoAPI = 'product/getproductinfo';
   static const String updateProductAPI = 'product/update';
+  static const String addProductAPI = 'product/addproduct';
 }
