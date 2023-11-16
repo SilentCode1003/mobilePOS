@@ -25,12 +25,21 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> login() async {
     final BuildContext capturedContext = context;
     try {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          });
+
       String username = _usernameController.text;
       String password = _passwordController.text;
       final results = await LoginAPI().getLogin(username, password);
       final jsonData = json.encode(results['data']);
 
       if (username == "" && password == "") {
+        Navigator.pop(context);
         return showDialog(
             context: capturedContext,
             barrierDismissible: false,
@@ -49,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (results['msg'] == 'success') {
         if (jsonData.length == 2) {
+           Navigator.pop(context);
           showDialog(
               context: capturedContext,
               barrierDismissible: false,
@@ -70,6 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
               user = User(data['fullname'], data['accesstype']);
             }
           });
+
+           Navigator.pop(context);
 
           showDialog(
               context: capturedContext,
