@@ -183,6 +183,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
         Database db = await dh.database;
         List<Map<String, dynamic>> posconfig = await db.query('pos');
+        List<Map<String, dynamic>> emailconfig = await db.query('email');
 
         for (var pos in posconfig) {
           // print(
@@ -200,7 +201,7 @@ class _TransactionPageState extends State<TransactionPage> {
           int? quantity = widget.cart[product];
           Product? productData = widget.products.firstWhere(
             (p) => p.name == product,
-            orElse: () => Product("Product Not Found", 0.0, ""),
+            orElse: () => Product("Product Not Found", 0.0, "",0),
           );
 
           itemlist.add({
@@ -276,13 +277,11 @@ class _TransactionPageState extends State<TransactionPage> {
               widget.incrementid;
             });
 
-            final pdfBytes = await Receipt(
-                    itemlist, widget.total, change, cash, widget.user.fullname)
-                .printReceipt();
-
-            // print(pdfBytes);
-
             if (Platform.isWindows) {
+              final pdfBytes = await Receipt(itemlist, widget.total, change,
+                      cash, widget.user.fullname)
+                  .printReceipt();
+
               List<Printer> printerList = await Printing.listPrinters();
               for (var printer in printerList) {
                 if (printer.isDefault) {
@@ -313,50 +312,53 @@ class _TransactionPageState extends State<TransactionPage> {
                           SizedBox(
                             height: 10,
                           ),
-                          Container(
-                            constraints: const BoxConstraints(
-                              minWidth: 200.0,
-                              maxWidth: 380.0,
-                            ),
-                            child: TextField(
-                              controller: _emailaddressController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
+                          if (emailconfig.isNotEmpty)
+                            Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 200.0,
+                                maxWidth: 380.0,
+                              ),
+                              child: TextField(
+                                controller: _emailaddressController,
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: const InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color.fromARGB(255, 0, 0, 0)),
+                                  ),
+                                  labelText: 'Email Address',
+                                  labelStyle: TextStyle(
                                       color: Color.fromARGB(255, 0, 0, 0)),
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Enter Email Address',
+                                  prefixIcon: Icon(Icons.email),
                                 ),
-                                labelText: 'Email Address',
-                                labelStyle: TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 0)),
-                                border: OutlineInputBorder(),
-                                hintText: 'Enter Email Address',
-                                prefixIcon: Icon(Icons.email),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                     actions: [
-                      ElevatedButton(
-                          onPressed: () {
-                            // showDialog(
-                            //     context: context,
-                            //     builder: (context) {
-                            //       return const Center(
-                            //         child: CircularProgressIndicator(),
-                            //       );
-                            //     });
+                      if (emailconfig.isNotEmpty)
+                        ElevatedButton(
+                            onPressed: () {
+                              // showDialog(
+                              //     context: context,
+                              //     builder: (context) {
+                              //       return const Center(
+                              //         child: CircularProgressIndicator(),
+                              //       );
+                              //     });
 
-                            // Navigator.of(context).pop();
-                            _sendereceipt(paymenttype, referenceno, customerid);
-                          },
-                          child: const Text(
-                            'Send Receipt',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600),
-                          )),
+                              // Navigator.of(context).pop();
+                              _sendereceipt(
+                                  paymenttype, referenceno, customerid);
+                            },
+                            child: const Text(
+                              'Send Receipt',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w600),
+                            )),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();

@@ -30,8 +30,8 @@ class _ProductPageState extends State<ProductPage> {
 
     setState(() {
       for (var data in json.decode(jsonData)) {
-        productlist.add(Product(
-            data['description'], data['price'].toDouble(), data['image']));
+        productlist.add(Product(data['description'], data['price'].toDouble(),
+            data['image'], data['quantity']));
       }
     });
   }

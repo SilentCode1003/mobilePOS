@@ -38,7 +38,7 @@ class _CartItemPageState extends State<CartItemPage> {
       int? quantity = widget.cart[product];
       Product? productData = widget.products.firstWhere(
         (p) => p.name == product,
-        orElse: () => Product("Product Not Found", 0.0, ""),
+        orElse: () => Product("Product Not Found", 0.0, "", 0),
       );
 
       if (productData != null) {

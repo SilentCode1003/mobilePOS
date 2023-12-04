@@ -66,8 +66,8 @@ class _CartPageState extends State<CartPage> {
 
     setState(() {
       for (var data in json.decode(jsonData)) {
-        productlist.add(Product(
-            data['description'], data['price'].toDouble(), data['image']));
+        productlist.add(Product(data['description'], data['price'].toDouble(),
+            data['image'], data['quantity']));
       }
     });
   }
@@ -84,16 +84,42 @@ class _CartPageState extends State<CartPage> {
 
   void addToCart(String product) {
     setState(() {
-      if (cart.containsKey(product)) {
-        cart[product] = (cart[product] ?? 0) + 1;
-        totalPrices[product] = (totalPrices[product] ?? 0) +
-            productlist.firstWhere((p) => p.name == product).price;
+      int current_quantity =
+          productlist.firstWhere((p) => p.name == product).quantity;
+      int cartitem_quatity = (cart[product] ?? 0) + 1;
+
+      if (cartitem_quatity <= current_quantity) {
+        print(cart[product]);
+        if (cart.containsKey(product)) {
+          cart[product] = (cart[product] ?? 0) + 1;
+          totalPrices[product] = (totalPrices[product] ?? 0) +
+              productlist.firstWhere((p) => p.name == product).price;
+        } else {
+          cart[product] = 1;
+          totalPrices[product] =
+              productlist.firstWhere((p) => p.name == product).price;
+        }
+        updateTotalCartItems(); // Update the total cart items
       } else {
-        cart[product] = 1;
-        totalPrices[product] =
-            productlist.firstWhere((p) => p.name == product).price;
+        print('Sorry $product availability is $current_quantity');
+        showDialog(
+          barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Availability'),
+                content:
+                    Text('Sorry "$product" availability is $current_quantity'),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('OK'))
+                ],
+              );
+            });
       }
-      updateTotalCartItems(); // Update the total cart items
     });
   }
 
@@ -263,15 +289,26 @@ class _CartPageState extends State<CartPage> {
                         Expanded(
                           child: ListTile(
                             title: Text(productlist[index].name),
-                            subtitle: Text(
-                              'Price: ₱${productlist[index].price.toStringAsFixed(2)}',
+                            subtitle: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Price: ₱${productlist[index].price.toStringAsFixed(2)}',
+                                ),
+                                Text(
+                                  'Availability: ${productlist[index].quantity}',
+                                )
+                              ],
                             ),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                addToCart(productlist[index].name);
-                              },
-                              child: const Text("Add to Cart"),
-                            ),
+                            trailing: (productlist[index].quantity < 1)
+                                ? null
+                                : ElevatedButton(
+                                    onPressed: () {
+                                      addToCart(productlist[index].name);
+                                    },
+                                    child: const Text("Add to Cart"),
+                                  ),
                           ),
                         )
                       ],
@@ -292,6 +329,7 @@ class Product {
   final String name;
   final double price;
   final String imageAsset;
+  final int quantity;
 
-  Product(this.name, this.price, this.imageAsset);
+  Product(this.name, this.price, this.imageAsset, this.quantity);
 }

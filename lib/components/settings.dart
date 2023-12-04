@@ -38,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       List<Map<String, dynamic>> posconfig = await db.query('pos');
       List<Map<String, dynamic>> storeconfig = await db.query('store');
-      List<Map<String, dynamic>> emailpos = await db.query('email');
+      
 
       if (posconfig.isNotEmpty && storeconfig.isNotEmpty) {
         setState(() {
